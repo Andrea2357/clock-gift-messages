@@ -24,5 +24,11 @@ Open the editor through this preview URL:
 https://htmlpreview.github.io/?https://github.com/Andrea2357/clock-gift-messages/blob/main/editor.html
 `
 
-The editor runs in the browser, lets you edit every message category, and downloads a new messages.json. Upload that downloaded file to this repository to update the remote messages used by the desktop app.
+The editor runs in the browser, lets you edit every message category, downloads a new messages.json, or saves directly to GitHub when you provide a fine-grained token limited to this repository. Upload that downloaded file to this repository to update the remote messages used by the desktop app.
+Token guidance:
+
+- Create a fine-grained personal access token.
+- Repository access: only Andrea2357/clock-gift-messages.
+- Repository permissions: Contents as Read and write.
+- Do not grant access to the private app repository.
 
