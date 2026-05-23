@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>男友文案编辑器</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080706;
+      --panel: #13100e;
+      --panel-soft: #1c1713;
+      --text: #fffaf2;
+      --muted: #d8c7ad;
+      --line: #4a3a31;
+      --paper: #fffaf2;
+      --ink: #11100f;
+      --accent: #e7d7c4;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px;
+      background: #100e0c;
+      border-bottom: 1px solid #2b2520;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: calc(100vh - 73px);
+    }
+
+    nav {
+      padding: 16px;
+      border-right: 1px solid #2b2520;
+      background: #0c0a09;
+    }
+
+    button,
+    .file-button {
+      min-height: 34px;
+      padding: 7px 13px;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover,
+    .file-button:hover {
+      background: #ecd8bd;
+    }
+
+    .category {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .category.active {
+      background: var(--paper);
+      color: var(--ink);
+      border-color: var(--accent);
+    }
+
+    .content {
+      padding: 22px 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .file-button input {
+      display: none;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 360px;
+      resize: vertical;
+      border: 0;
+      padding: 16px;
+      background: var(--paper);
+      color: var(--ink);
+      font: 15px/1.7 "Microsoft YaHei", "Segoe UI", sans-serif;
+      outline: none;
+    }
+
+    .preview {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        border-right: 0;
+        border-bottom: 1px solid #2b2520;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>男友文案编辑器</h1>
+      <p class="hint">每行一条，保存后给她的软件远程同步使用。</p>
+    </div>
+    <div class="toolbar">
+      <label class="file-button">
+        导入 JSON
+        <input id="importFile" type="file" accept="application/json,.json">
+      </label>
+      <button id="downloadButton" type="button">下载 messages.json</button>
+    </div>
+  </header>
+
+  <main>
+    <nav id="categoryList"></nav>
+    <section class="content">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 id="categoryTitle"></h2>
+            <p class="hint">空行会自动忽略。她的软件会在这些候选文案里随机选一条。</p>
+          </div>
+          <button id="resetButton" type="button">恢复本类默认</button>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </div>
+      <div class="preview" id="preview"></div>
+    </section>
+  </main>
+
+  <script>
+    const categories = [
+      ["focus_started", "专注开始"],
+      ["focus_running", "专注陪伴"],
+      ["short_break_started", "短休息开始"],
+      ["long_break_started", "长休息开始"],
+      ["all_completed", "全部完成"],
+      ["water_reminder", "喝水提醒"],
+      ["stand_reminder", "久坐提醒"],
+      ["message_reminder", "看看消息提醒"]
+    ];
+
+    const defaults = {
+      focus_started: [
+        "我在这里陪你，慢慢来，把这一小段时间交给自己。",
+        "开始啦，这一轮我安静陪你。"
+      ],
+      focus_running: [
+        "不用着急，我会安安静静陪你把这一轮走完。",
+        "你专心就好，我在。"
+      ],
+      short_break_started: [
+        "休息一下吧，喝口水，眼睛也要被好好照顾。",
+        "短休息到啦，先把肩膀放松一点点。"
+      ],
+      long_break_started: [
+        "这一轮完成得很好，起来走走吧，我等你回来。",
+        "长休息到啦，辛苦你了，真的很棒。"
+      ],
+      all_completed: [
+        "今天的这一段专注完成啦，辛苦你了。",
+        "完成啦，给你一个很认真很认真的夸夸。"
+      ],
+      water_reminder: [
+        "该喝水啦，别把自己忙坏了 ♡",
+        "小小提醒：喝一口水，我会放心一点。"
+      ],
+      stand_reminder: [
+        "坐太久啦，起来走一走吧～",
+        "活动一下肩颈，好好照顾自己。"
+      ],
+      message_reminder: [
+        "偷偷提醒一下：看看男朋友有没有给你发消息喔 ♡",
+        "如果不忙的话，可以看看我有没有想你。"
+      ]
+    };
+
+    let messages = structuredClone(defaults);
+    let currentKey = categories[0][0];
+
+    const categoryList = document.querySelector("#categoryList");
+    const categoryTitle = document.querySelector("#categoryTitle");
+    const editor = document.querySelector("#editor");
+    const preview = document.querySelector("#preview");
+
+    function cleanLines(text) {
+      return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    }
+
+    function saveCurrent() {
+      messages[currentKey] = cleanLines(editor.value);
+    }
+
+    function selectCategory(key) {
+      saveCurrent();
+      currentKey = key;
+      document.querySelectorAll(".category").forEach((button) => {
+        button.classList.toggle("active", button.dataset.key === key);
+      });
+      const item = categories.find(([categoryKey]) => categoryKey === key);
+      categoryTitle.textContent = item ? item[1] : key;
+      editor.value = (messages[key] || []).join("\n");
+      renderPreview();
+    }
+
+    function renderCategories() {
+      categoryList.innerHTML = "";
+      for (const [key, label] of categories) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "category";
+        button.dataset.key = key;
+        button.textContent = label;
+        button.addEventListener("click", () => selectCategory(key));
+        categoryList.appendChild(button);
+      }
+    }
+
+    function renderPreview() {
+      const lines = cleanLines(editor.value);
+      preview.textContent = lines.length
+        ? `当前分类共有 ${lines.length} 条候选文案。\n\n${lines.map((line, index) => `${index + 1}. ${line}`).join("\n")}`
+        : "当前分类还没有文案。";
+    }
+
+    function exportMessages() {
+      saveCurrent();
+      const payload = {
+        version: 1,
+        updated_at: new Date().toISOString(),
+        updated_by: "boyfriend",
+        messages
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "messages.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importMessages(file) {
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      const incoming = payload.messages || payload;
+      const next = structuredClone(defaults);
+      for (const [key] of categories) {
+        if (Array.isArray(incoming[key])) {
+          const lines = incoming[key].map((item) => String(item).trim()).filter(Boolean);
+          if (lines.length) {
+            next[key] = lines;
+          }
+        }
+      }
+      messages = next;
+      selectCategory(currentKey);
+    }
+
+    document.querySelector("#downloadButton").addEventListener("click", exportMessages);
+    document.querySelector("#resetButton").addEventListener("click", () => {
+      messages[currentKey] = structuredClone(defaults[currentKey]);
+      editor.value = messages[currentKey].join("\n");
+      renderPreview();
+    });
+    document.querySelector("#importFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      importMessages(file).catch((error) => {
+        alert(`导入失败：${error.message}`);
+      });
+      event.target.value = "";
+    });
+    editor.addEventListener("input", renderPreview);
+
+    renderCategories();
+    selectCategory(currentKey);
+  </script>
+</body>
+</html>

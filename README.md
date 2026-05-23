@@ -16,3 +16,13 @@ Edit flow:
 2. Download the generated `messages.json`.
 3. Replace `messages.json` in this repository.
 4. In the desktop app, use the raw URL above in remote message sync settings.
+## Boyfriend editor
+
+Open the editor through this preview URL:
+
+`	ext
+https://htmlpreview.github.io/?https://github.com/Andrea2357/clock-gift-messages/blob/main/editor.html
+`
+
+The editor runs in the browser, lets you edit every message category, and downloads a new messages.json. Upload that downloaded file to this repository to update the remote messages used by the desktop app.
+
