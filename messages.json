@@ -1,10 +1,10 @@
 {
   "version": 1,
+  "updated_at": "2026-05-23T06:16:09.144Z",
   "updated_by": "boyfriend",
   "messages": {
     "focus_started": [
-      "我在这里陪你，慢慢来，把这一小段时间交给自己。",
-      "开始啦，这一轮我安静陪你。"
+      "你先现在还好吗?"
     ],
     "focus_running": [
       "不用着急，我会安安静静陪你把这一轮走完。",
