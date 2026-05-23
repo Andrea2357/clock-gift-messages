@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-23T06:22:11.563Z",
+  "updated_at": "2026-05-23T07:15:59.293Z",
   "updated_by": "boyfriend",
   "messages": {
     "focus_started": [
@@ -8,8 +8,7 @@
       "开始啦，这一轮我安静陪你。"
     ],
     "focus_running": [
-      "不用着急，我会安安静静陪你把这一轮走完。",
-      "你专心就好，我在。"
+      "还在吗?"
     ],
     "short_break_started": [
       "休息一下吧，喝口水，眼睛也要被好好照顾。",
